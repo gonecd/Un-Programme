@@ -53,7 +53,7 @@ class GrapheFilter: UIView {
     }
     
     func drawOperation(y: Int, h: Int, profondeur: Int, type: String, index: String) {
-        let x : Int = 20 + (100 * profondeur)
+        let x : Int = 20 + (70 * profondeur)
         
         let uneView : UIView = UIView(frame: CGRect(x: x, y: y, width: xmax-(20*profondeur)-x, height :h))
         uneView.backgroundColor = UIColor.white
@@ -67,20 +67,21 @@ class GrapheFilter: UIView {
         self.addSubview(uneView)
         self.sendSubviewToBack(uneView)
         
-        let unOperateur : UILabel = UILabel(frame: CGRect(x: x+20, y: y+10, width: 80, height: 28))
-        unOperateur.text = type + "-" + index
+        let unOperateur : UILabel = UILabel(frame: CGRect(x: x+10, y: y+5, width: 80, height: 28))
+        unOperateur.text = type
         unOperateur.textColor = UIColor.black
-        unOperateur.font = UIFont.boldSystemFont(ofSize: 12.0)
-//        unOperateur.font = UIFont.boldSystemFont(ofSize: 32.0)
+        unOperateur.font = UIFont.boldSystemFont(ofSize: 20.0)
         self.addSubview(unOperateur)
 
-        self.addSubview(drawButton(x: x+10, y: y+55, width: 20, text: "-", action: #selector(removeUnit), index: index))
-        self.addSubview(drawButton(x: x+35, y: y+55, width: 30, text: "ed", action: #selector(editUnit), index: index))
-        self.addSubview(drawButton(x: x+70, y: y+55, width: 20, text: "+", action: #selector(addUnit), index: index))
+        self.addSubview(drawButton(x: x+10, y: y+60, width: 30, text: "ed", action: #selector(editUnit), index: index))
+        if (index != "0") {
+            self.addSubview(drawButton(x: x+15, y: y+35, width: 20, text: "-", action: #selector(removeUnit), index: index))
+            self.addSubview(drawButton(x: x+15, y: y+85, width: 20, text: "+", action: #selector(addUnit), index: index))
+        }
     }
     
     func drawUnit(y: Int, balise: String, operation: String, valeur : String, profondeur : Int, index: String) {
-        let x : Int = 20 + (100 * profondeur)
+        let x : Int = 20 + (70 * profondeur)
         
         let uneView : UIView = UIView(frame: CGRect(x: x, y: y, width: xmax-(20*profondeur)-x, height :hunit))
         uneView.backgroundColor = UIColor.white
@@ -94,18 +95,19 @@ class GrapheFilter: UIView {
         self.addSubview(uneView)
 
         let uneBalise : UILabel = UILabel(frame: CGRect(x: x+10, y: y+7, width: 180, height: 20))
-        uneBalise.text = balisesTable[baliseIndex[balise] as? Int ?? 0].description + "-" + index
+        uneBalise.text = balisesTable[baliseIndex[balise] as? Int ?? 0].description
         uneBalise.textColor = UIColor.blue
         uneBalise.font = UIFont.boldSystemFont(ofSize: 13.0)
         self.addSubview(uneBalise)
         
-        let uneOperation : UILabel = UILabel(frame: CGRect(x: x+200, y: y+7, width: 100, height: 20))
+        let uneOperation : UILabel = UILabel(frame: CGRect(x: x+65, y: y+7, width: 100, height: 20))
         uneOperation.text = operateursListe[operation] as? String ?? ""
         uneOperation.textColor = UIColor.black
         uneOperation.font = UIFont.systemFont(ofSize: 13.0)
+        uneOperation.textAlignment = .center
         self.addSubview(uneOperation)
         
-        let uneValeur : UILabel = UILabel(frame: CGRect(x: x+300, y: y+7, width: 200, height: 20))
+        let uneValeur : UILabel = UILabel(frame: CGRect(x: x+150, y: y+7, width: 200, height: 20))
         uneValeur.text = valeur
         uneValeur.textColor = UIColor.blue
         uneValeur.font = UIFont.systemFont(ofSize: 13.0)

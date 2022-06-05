@@ -9,9 +9,19 @@ import Foundation
 import UIKit
 
 
+protocol FilterDetailsViewControllerDelegate: AnyObject {
+    func FilterUpdated(filter : Filtre, mode : Int)
+}
+
+let modeAdd    : Int = 0
+let modeDelete : Int = 1
+let modeEdit   : Int = 2
+
 
 class FilterDetails: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource {
     
+    weak var delegate: FilterDetailsViewControllerDelegate?
+
     @IBOutlet weak var filterName: UITextField!
     @IBOutlet weak var graphe: GrapheFilter!
     @IBOutlet weak var filterDef: UIView!
@@ -24,18 +34,15 @@ class FilterDetails: UIViewController, UIPickerViewDelegate, UIPickerViewDataSou
     
     var filtre : Filtre = Filtre.init(nom: "")
     var idxFiltre : Int = 0
-//    var table: UITableView!
     
     var noeudEdite : String = ""
     var editMode : String = "add"
-    var filtreOriginel : Filtre = Filtre(nom: "Swipe this to add a filter")
+    var filtreOriginel : Filtre = Filtre(nom: "")
 
     override func viewDidLoad() {
         super.viewDidLoad()
      
-        if (filtre.nom != "Swipe this to add a filter") {
-            filterName.text = filtre.nom
-        }
+        filterName.text = filtre.nom
         
         filterDef.layer.cornerRadius = 20.0
         filterDef.layer.masksToBounds = true
@@ -61,7 +68,7 @@ class FilterDetails: UIViewController, UIPickerViewDelegate, UIPickerViewDataSou
         filtreOriginel.noeudInitial = unFiltre
         
         filtre = filtreOriginel.copy() as! Filtre
-        filtre.nom = "Swipe this to add a filter"
+        filtre.nom = ""
         
         graphe.vue = self
         graphe.filtre = filtre.noeudInitial
@@ -79,27 +86,19 @@ class FilterDetails: UIViewController, UIPickerViewDelegate, UIPickerViewDataSou
             if (filterName.text != filtre.nom) {
                 let newFiltre : Filtre = Filtre(nom: filterName.text!)
                 newFiltre.noeudInitial = filtre.noeudInitial
-                filtres.append(newFiltre)
+                delegate?.FilterUpdated(filter : newFiltre, mode : modeAdd)
             }
             else{
-                filtres[idxFiltre].noeudInitial = filtre.noeudInitial
+                delegate?.FilterUpdated(filter : filtre, mode : modeEdit)
             }
             
-//            saveFilters()
-//            table.reloadData()
-//            table.setNeedsDisplay()
             dismiss(animated: true, completion: nil)
         }
     }
     
     @IBAction func suppress(_ sender: Any) {
-        if (idxFiltre != -1) {
-            filtres.remove(at: idxFiltre)
-//            saveFilters()
-//            table.reloadData()
-//            table.setNeedsDisplay()
-            dismiss(animated: true, completion: nil)
-        }
+        delegate?.FilterUpdated(filter : filtre, mode : modeDelete)
+        dismiss(animated: true, completion: nil)
     }
     
     

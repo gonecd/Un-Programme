@@ -16,8 +16,6 @@ let ConfigDir  : URL               = AppDir.appendingPathComponent("config")
 let dateFormat      : DateFormatter     = DateFormatter()
 let heureFormat     : DateFormatter     = DateFormatter()
 
-var filtres      : [Filtre]          = []
-
 
 func checkDirectories() {
     do
@@ -35,6 +33,31 @@ func checkDirectories() {
         }
     }
     catch let error as NSError { print(error.localizedDescription); }
+}
+
+func loadFilters() -> [Filtre] {
+    var loaded : [Filtre] = []
+    
+    if let nsData = NSData(contentsOf: ConfigDir.appendingPathComponent("Filtres")) {
+        do {
+            let data = Data(referencing:nsData)
+            
+            loaded = try (NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(data) as? [Filtre])!
+        } catch {
+            print("Echec de la lecture de la DB")
+        }
+    }
+    
+    return loaded
+}
+
+func saveFilters(filtres : [Filtre]) {
+    do {
+        let data = try NSKeyedArchiver.archivedData(withRootObject: filtres, requiringSecureCoding: false)
+        try data.write(to: ConfigDir.appendingPathComponent("Filtres"))
+    } catch {
+        print ("Echec de la sauvegarde des filtres")
+    }
 }
 
 func getImage(_ url: String) -> UIImage {
@@ -297,31 +320,46 @@ let Categories : [String] = [
 ]
 
 let balisesTable: Array = [
-    (balise: "titre", description: "Titre du programme", operations: ["BEGINSWITH[cd]", "CONTAINS[cd]", "ENDSWITH[cd]", "LIKE[cd]", "MATCHES"], values: []),
-    (balise: "debut", description: "Heure de début", operations: ["=", ">", "<"], values: []),
-    (balise: "fin", description: "Heure de fin", operations: ["=", ">", "<"], values: []),
-    (balise: "chaine", description: "Chaîne de diffusion", operations: ["BEGINSWITH[cd]", "CONTAINS[cd]", "ENDSWITH[cd]", "LIKE[cd]", "MATCHES"], values: []),
-    (balise: "sousTitre", description: "Sous titre du programme", operations: ["BEGINSWITH[cd]", "CONTAINS[cd]", "ENDSWITH[cd]", "LIKE[cd]", "MATCHES"], values: []),
-    (balise: "resume", description: "Résumé du programme", operations: ["BEGINSWITH[cd]", "CONTAINS[cd]", "ENDSWITH[cd]", "LIKE[cd]", "MATCHES"], values: []),
-    (balise: "category", description: "Catégorie de programme", operations: ["BEGINSWITH[cd]", "CONTAINS[cd]", "ENDSWITH[cd]", "LIKE[cd]", "MATCHES"], values: []),
-    (balise: "ratingCSA", description: "Signalétique CSA", operations: ["=", "IN", "!="], values: ["-10", "-12", "-16", "Tout public", ""]),
-    (balise: "ratingTelerama", description: "Etoiles Télérama", operations: ["=", "IN", "!="], values: ["1/5", "2/5", "3/5", "4/5", "5/5", ""]),
-    (balise: "annee", description: "Année de première diffusion", operations: ["BEGINSWITH[cd]", "CONTAINS[cd]", "ENDSWITH[cd]", "LIKE[cd]", "MATCHES"], values: []),
-    (balise: "episode", description: "Episode numéro", operations: ["BEGINSWITH[cd]", "CONTAINS[cd]", "ENDSWITH[cd]", "LIKE[cd]", "MATCHES"], values: []),
-    (balise: "duree", description: "Durée du programme", operations: ["BEGINSWITH[cd]", "CONTAINS[cd]", "ENDSWITH[cd]", "LIKE[cd]", "MATCHES"], values: [])
+    (balise: "titre", description: "Titre", operations: ["BEGINSWITH[cd]", "CONTAINS[cd]", "ENDSWITH[cd]", "LIKE[cd]", "MATCHES"], values: []),
+    (balise: "debut", description: "Début", operations: ["=", ">", "<"], values: []),
+    (balise: "fin", description: "Fin", operations: ["=", ">", "<"], values: []),
+    (balise: "chaine", description: "Chaîne", operations: ["BEGINSWITH[cd]", "CONTAINS[cd]", "ENDSWITH[cd]", "LIKE[cd]", "MATCHES"], values: []),
+    (balise: "sousTitre", description: "Sous titre", operations: ["BEGINSWITH[cd]", "CONTAINS[cd]", "ENDSWITH[cd]", "LIKE[cd]", "MATCHES"], values: []),
+    (balise: "resume", description: "Résumé", operations: ["BEGINSWITH[cd]", "CONTAINS[cd]", "ENDSWITH[cd]", "LIKE[cd]", "MATCHES"], values: []),
+    (balise: "category", description: "Catégorie", operations: ["BEGINSWITH[cd]", "CONTAINS[cd]", "ENDSWITH[cd]", "LIKE[cd]", "MATCHES"], values: []),
+    (balise: "ratingCSA", description: "CSA", operations: ["=", "IN", "!="], values: ["-10", "-12", "-16", "Tout public", ""]),
+    (balise: "ratingTelerama", description: "Etoiles", operations: ["=", "IN", "!="], values: ["1/5", "2/5", "3/5", "4/5", "5/5", ""]),
+    (balise: "annee", description: "1ère diff", operations: ["BEGINSWITH[cd]", "CONTAINS[cd]", "ENDSWITH[cd]", "LIKE[cd]", "MATCHES"], values: []),
+    (balise: "episode", description: "Episode", operations: ["BEGINSWITH[cd]", "CONTAINS[cd]", "ENDSWITH[cd]", "LIKE[cd]", "MATCHES"], values: []),
+    (balise: "duree", description: "Durée", operations: ["BEGINSWITH[cd]", "CONTAINS[cd]", "ENDSWITH[cd]", "LIKE[cd]", "MATCHES"], values: [])
 ]
 
+//let balisesTable: Array = [
+//    (balise: "titre", description: "Titre du programme", operations: ["BEGINSWITH[cd]", "CONTAINS[cd]", "ENDSWITH[cd]", "LIKE[cd]", "MATCHES"], values: []),
+//    (balise: "debut", description: "Heure de début", operations: ["=", ">", "<"], values: []),
+//    (balise: "fin", description: "Heure de fin", operations: ["=", ">", "<"], values: []),
+//    (balise: "chaine", description: "Chaîne de diffusion", operations: ["BEGINSWITH[cd]", "CONTAINS[cd]", "ENDSWITH[cd]", "LIKE[cd]", "MATCHES"], values: []),
+//    (balise: "sousTitre", description: "Sous titre du programme", operations: ["BEGINSWITH[cd]", "CONTAINS[cd]", "ENDSWITH[cd]", "LIKE[cd]", "MATCHES"], values: []),
+//    (balise: "resume", description: "Résumé du programme", operations: ["BEGINSWITH[cd]", "CONTAINS[cd]", "ENDSWITH[cd]", "LIKE[cd]", "MATCHES"], values: []),
+//    (balise: "category", description: "Catégorie de programme", operations: ["BEGINSWITH[cd]", "CONTAINS[cd]", "ENDSWITH[cd]", "LIKE[cd]", "MATCHES"], values: []),
+//    (balise: "ratingCSA", description: "Signalétique CSA", operations: ["=", "!="], values: ["-10", "-12", "-16", "Tout public", ""]),
+//    (balise: "ratingTelerama", description: "Etoiles Télérama", operations: ["=", "!="], values: ["1/5", "2/5", "3/5", "4/5", "5/5", ""]),
+//    (balise: "annee", description: "Année de première diffusion", operations: ["BEGINSWITH[cd]", "CONTAINS[cd]", "ENDSWITH[cd]", "LIKE[cd]", "MATCHES"], values: []),
+//    (balise: "episode", description: "Episode numéro", operations: ["BEGINSWITH[cd]", "CONTAINS[cd]", "ENDSWITH[cd]", "LIKE[cd]", "MATCHES"], values: []),
+//    (balise: "duree", description: "Durée du programme", operations: ["BEGINSWITH[cd]", "CONTAINS[cd]", "ENDSWITH[cd]", "LIKE[cd]", "MATCHES"], values: [])
+//]
+
 let operateursListe: NSDictionary = [
-    "=" : "est égal à",
-    ">" : "est supérieur à",
-    "<" : "est inférieur à",
-    "!=" : "est différent de",
-    "IN" : "est l'un de",
-    "BEGINSWITH[cd]" : "commence avec",
-    "CONTAINS[cd]" : "contient",
-    "ENDSWITH[cd]" : "finit avec",
-    "LIKE[cd]" : "ressemble à",
-    "MATCHES" : "matche (regex)"
+    "="                 : "est égal à",
+    ">"                 : "est sup. à",
+    "<"                 : "est inf. à",
+    "!="                : "est diff. de",
+    "IN"                : "est l'un de",
+    "BEGINSWITH[cd]"    : "commence par",
+    "CONTAINS[cd]"      : "contient",
+    "ENDSWITH[cd]"      : "finit avec",
+    "LIKE[cd]"          : "ressemble à",
+    "MATCHES"           : "matche"
 ]
 
 let baliseIndex : NSDictionary = [

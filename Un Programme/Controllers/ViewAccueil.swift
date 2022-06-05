@@ -21,13 +21,19 @@ class CellProgramme : UITableViewCell {
     var index : Int = 0
 }
 
+class CellFiltre : UITableViewCell {
+    @IBOutlet weak var nom: UILabel!
+    @IBOutlet weak var valeur: UILabel!
+}
+
 
 class ViewAccueil: UIViewController, UIPickerViewDelegate, UIPickerViewDataSource, UITableViewDelegate, UITableViewDataSource {
 
     @IBOutlet weak var nbChaines: UILabel!
     @IBOutlet weak var nbProgs: UILabel!
     
-    @IBOutlet weak var liste: UITableView!
+    @IBOutlet weak var listeProgs: UITableView!
+    @IBOutlet weak var listeFiltres: UITableView!
     
     @IBOutlet weak var jour: UISegmentedControl!
     @IBOutlet weak var heure: UISegmentedControl!
@@ -38,7 +44,15 @@ class ViewAccueil: UIViewController, UIPickerViewDelegate, UIPickerViewDataSourc
     @IBOutlet weak var boutonCategLeft: UIButton!
     @IBOutlet weak var boutonCategRight: UIButton!
     
+    @IBOutlet weak var viewDynamique: UIView!
+    @IBOutlet weak var viewMisc: UIView!
+    @IBOutlet weak var viewFiltresPredef: UIView!
     
+    @IBOutlet weak var roue: UIActivityIndicatorView!
+    @IBOutlet weak var menuSel: UISegmentedControl!
+    
+    
+    var FiltresListe   : [Filtre] = []
     var ProgListe      : [Prog] = [Prog]()
     var selectedChaine : String = ""
     var categLevel     : Int = 1
@@ -67,6 +81,8 @@ class ViewAccueil: UIViewController, UIPickerViewDelegate, UIPickerViewDataSourc
         db.DataRead(source : "Canal")
         db.DataRead(source : "TNT")
        
+        print("* Loading des Filtres")
+        FiltresListe = loadFilters()
 
         
         
@@ -89,27 +105,41 @@ class ViewAccueil: UIViewController, UIPickerViewDelegate, UIPickerViewDataSourc
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return ProgListe.count
+        if ( tableView == listeProgs ) { return ProgListe.count }
+        else if (tableView == listeFiltres ) { return FiltresListe.count }
+        else { return 0 }
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: "CellProgramme", for: indexPath) as! CellProgramme
-        
-        cell.titre.text = ProgListe[indexPath.row].titre
-        cell.jour.text = dateFormat.string(from: ProgListe[indexPath.row].debut)
-        cell.debut.text = heureFormat.string(from: ProgListe[indexPath.row].debut)
-        cell.fin.text = heureFormat.string(from: ProgListe[indexPath.row].fin)
-        cell.categorie.text = ProgListe[indexPath.row].grpCategory
-        cell.chaine.image = getImage((db.Chaines[ProgListe[indexPath.row].chaine] as! Chaine).icone)
-        cell.index = indexPath.row
-        
-        cell.categorie.layer.borderColor = UIColor.systemBlue.cgColor
-        cell.categorie.layer.borderWidth = 1
-        cell.categorie.layer.cornerRadius = 12
-        cell.categorie.layer.masksToBounds = true
+        if ( tableView == listeProgs ) {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "CellProgramme", for: indexPath) as! CellProgramme
+            
+            cell.titre.text = ProgListe[indexPath.row].titre
+            cell.jour.text = dateFormat.string(from: ProgListe[indexPath.row].debut)
+            cell.debut.text = heureFormat.string(from: ProgListe[indexPath.row].debut)
+            cell.fin.text = heureFormat.string(from: ProgListe[indexPath.row].fin)
+            cell.categorie.text = ProgListe[indexPath.row].grpCategory
+            cell.chaine.image = getImage((db.Chaines[ProgListe[indexPath.row].chaine] as! Chaine).icone)
+            cell.index = indexPath.row
+            
+            cell.categorie.layer.borderColor = UIColor.systemBlue.cgColor
+            cell.categorie.layer.borderWidth = 1
+            cell.categorie.layer.cornerRadius = 12
+            cell.categorie.layer.masksToBounds = true
+            
+            return cell
+        }
+        else {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "CellFiltre", for: indexPath) as! CellFiltre
+            
+            cell.nom.text = FiltresListe[indexPath.row].nom
+            cell.valeur.text = "42"
+            cell.valeur.layer.cornerRadius = 8
+            cell.valeur.layer.masksToBounds = true
 
-        return cell
+            return cell
+        }
     }
     
     
@@ -201,8 +231,6 @@ class ViewAccueil: UIViewController, UIPickerViewDelegate, UIPickerViewDataSourc
         }
     }
     
-    
-    
     func buildSousCategList(CategLevel1: String) -> [String] {
         var liste : [String] = [""]
         
@@ -215,10 +243,14 @@ class ViewAccueil: UIViewController, UIPickerViewDelegate, UIPickerViewDataSourc
     
     
     @IBAction func filter(_ sender: Any) {
+        roue.startAnimating()
+        
         ProgListe = db.Programme.filter { buildPredicat().evaluate(with: $0) }
         
-        liste.reloadData()
-        liste.setNeedsDisplay()
+        listeProgs.reloadData()
+        listeProgs.setNeedsDisplay()
+        
+        roue.stopAnimating()
     }
 
     
@@ -313,10 +345,28 @@ class ViewAccueil: UIViewController, UIPickerViewDelegate, UIPickerViewDataSourc
         }
         else {
             print ("Segue Inconnu")
+            let filterDef : FilterDetails = segue.destination as! FilterDetails
+            filterDef.delegate = self
         }
     }
 
     
+    @IBAction func menuSelector(_ sender: Any) {
+        if ( menuSel.selectedSegmentIndex == 0) {
+            viewMisc.isHidden = true
+            viewFiltresPredef.isHidden = true
+            viewDynamique.isHidden = false
+        } else if ( menuSel.selectedSegmentIndex == 1) {
+            viewMisc.isHidden = true
+            viewFiltresPredef.isHidden = false
+            viewDynamique.isHidden = true
+        } else if ( menuSel.selectedSegmentIndex == 2) {
+            viewMisc.isHidden = false
+            viewFiltresPredef.isHidden = true
+            viewDynamique.isHidden = true
+        }
+        
+    }
 }
 
 
@@ -326,6 +376,31 @@ extension ViewAccueil: ChaineSelectionViewControllerDelegate {
         selectedChaine = id
         
         filter(self)
+    }
+}
+
+extension ViewAccueil: FilterDetailsViewControllerDelegate {
+    func FilterUpdated(filter : Filtre, mode : Int) {
+        print ("FILTER UPDATE : \(filter.nom) en mode \(mode)")
+        
+        if (mode == modeAdd) {
+            FiltresListe.append(filter)
+        }
+        else if (mode == modeDelete) {
+            FiltresListe.remove(at: FiltresListe.firstIndex(of: filter)!)
+        }
+        else if (mode == modeEdit) {
+            print ("Mode Edit à coder ...)")
+        }
+        else {
+            print ("Mode inconnu ...)")
+        }
+
+        FiltresListe = FiltresListe.sorted(by: { $0.nom < $1.nom })
+        saveFilters(filtres: FiltresListe)
+        
+        listeFiltres.reloadData()
+        listeFiltres.setNeedsDisplay()
     }
 }
 

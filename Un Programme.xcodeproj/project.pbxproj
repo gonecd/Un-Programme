@@ -136,11 +136,11 @@
 		F1627D9E27DFAC54009FB39D /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
-				F1627DCC27EE0D2B009FB39D /* GrapheFilter.swift */,
 				F1627D8C27DFAC0A009FB39D /* ViewAccueil.swift */,
 				F1627DA727E38DB8009FB39D /* DetailProgramme.swift */,
 				F1627DC627E8E36E009FB39D /* ChaineSelection.swift */,
 				F1627DC827EE0979009FB39D /* FiltresDefinition.swift */,
+				F1627DCC27EE0D2B009FB39D /* GrapheFilter.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
